@@ -19,7 +19,13 @@ toc: true
 #| message: false
 
 library(tidyverse)
-
+library(dplyr)
+library(janitor)
+library(lubridate)
+library(modelsummary)
+library(rstanarm)
+library(knitr)
+library(bayesplot)
 ```
 
 
@@ -333,6 +339,7 @@ new_col_names <- as.character(unlist(NBA2024[2, ]))
 NBA2024 <- NBA2024[-c(1, 2), ]
 colnames(NBA2024) <- new_col_names
 NBA2024[] <- lapply(NBA2024, type.convert, as.is = TRUE)
+
 ```
 
 
@@ -371,10 +378,12 @@ for (year in years) {
     dataset$norm_WS <- dataset$WS / dataset$avg_WS
     
     # Calculate MVP index, now including WS
-    dataset$MVP_index <- 0.5 * dataset$norm_PTS +
-                         0.2 * dataset$norm_AST +
-                         0.2 * dataset$norm_TRB +
-                         0.1 * dataset$norm_WS  # Adjust weights as needed
+    dataset$MVP_index <- 0.8 * dataset$norm_PTS +
+                         0.25 * dataset$norm_AST +
+                         0.25 * dataset$norm_TRB +
+                         0.1 * dataset$norm_BLK +
+                         0.1 * dataset$norm_STL +
+                         0.15 * dataset$norm_WS  # Adjust weights as needed
     
     # Assign the modified dataset back to the environment
     assign(dataset_name, dataset)
@@ -412,6 +421,17 @@ for (year in years) {
   }
 }
 
+nba_list <- list()
+
+for (year in years) {
+  dataset_name <- paste0("NBA", year)
+  dataset <- get(dataset_name)
+  dataset$Year <- year
+  nba_list[[as.character(year)]] <- dataset
+}
+
+nba_master <- do.call(rbind, nba_list)
+write.csv(nba_master, "../data/nba_master.csv", row.names = FALSE)
 
 
 
@@ -474,7 +494,23 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \sigma &\sim \mbox{Exponential}(1)
 \end{align}
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+
+```{r}
+bay_model <- stan_glm(
+  MVP_index ~ PTS + AST + TRB + BLK + STL + WS,
+  data = nba_master,
+   family = gaussian(),
+  prior = normal(0, 5),
+  prior_intercept = normal(0, 5),
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  cores = 4,
+  control = list(adapt_delta = 0.95),
+  seed = 613
+)
+
+```
 
 
 ### Model justification
