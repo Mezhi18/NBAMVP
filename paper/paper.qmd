@@ -1,6 +1,6 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Finding the True MVP"
+subtitle: "An NBA Analysis Through Linear Regression"
 author: 
   - Yan B. Mezhiborsky
 thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
@@ -343,6 +343,12 @@ new_col_names <- as.character(unlist(NBA2024[2, ]))
 NBA2024 <- NBA2024[-c(1, 2), ]
 colnames(NBA2024) <- new_col_names
 NBA2024[] <- lapply(NBA2024, type.convert, as.is = TRUE)
+```
+
+
+```{r}
+Real_MVP_Data <- read.csv("../NBAMVP/data/01-raw_data/NBA\\ MVPs/Real_MVP_Data.csv")
+
 
 ```
 
@@ -354,18 +360,12 @@ years <- 1986:2024
 
 # Normalize columns and calculate MVP index with WS
 for (year in years) {
-  # Construct dataset name dynamically
   dataset_name <- paste0("NBA", year)
-  
-  # Access dataset using `get()`
   dataset <- get(dataset_name)
   
-  # Check if required columns exist
   if (all(c("PTS", "AST", "TRB", "STL", "BLK", "WS") %in% colnames(dataset))) {
-    # Calculate column-wise averages, including WS
     averages <- colMeans(dataset[c("PTS", "AST", "TRB", "STL", "BLK", "WS")], na.rm = TRUE)
     
-    # Add average columns to the dataset
     dataset$avg_PTS <- averages["PTS"]
     dataset$avg_AST <- averages["AST"]
     dataset$avg_TRB <- averages["TRB"]
@@ -373,7 +373,6 @@ for (year in years) {
     dataset$avg_BLK <- averages["BLK"]
     dataset$avg_WS <- averages["WS"]
     
-    # Normalize by averages
     dataset$norm_PTS <- dataset$PTS / dataset$avg_PTS
     dataset$norm_AST <- dataset$AST / dataset$avg_AST
     dataset$norm_TRB <- dataset$TRB / dataset$avg_TRB
@@ -381,15 +380,13 @@ for (year in years) {
     dataset$norm_BLK <- dataset$BLK / dataset$avg_BLK
     dataset$norm_WS <- dataset$WS / dataset$avg_WS
     
-    # Calculate MVP index, now including WS
     dataset$MVP_index <- 0.8 * dataset$norm_PTS +
                          0.25 * dataset$norm_AST +
                          0.25 * dataset$norm_TRB +
                          0.1 * dataset$norm_BLK +
                          0.1 * dataset$norm_STL +
-                         0.15 * dataset$norm_WS  # Adjust weights as needed
+                         0.15 * dataset$norm_WS
     
-    # Assign the modified dataset back to the environment
     assign(dataset_name, dataset)
   } else {
     stop(paste0("One or more required columns (PTS, AST, TRB, STL, BLK, WS) are missing in dataset for year ", year))
@@ -397,28 +394,32 @@ for (year in years) {
 }
 
 # Create a table of the player with the highest MVP index for each year
-mvp_table <- data.frame(Year = integer(), Player = character(), MVP_index = numeric(), stringsAsFactors = FALSE)
+mvp_table <- data.frame(Year = integer(), Player = character(), MVP_index = numeric(), 
+                        PTS = numeric(), AST = numeric(), TRB = numeric(), 
+                        BLK = numeric(), STL = numeric(), WS = numeric(), 
+                        stringsAsFactors = FALSE)
 
 # Iterate over each year to find the top player
 for (year in years) {
-  # Construct dataset name dynamically
   dataset_name <- paste0("NBA", year)
-  
-  # Access dataset using `get()`
   dataset <- get(dataset_name)
   
-  # Ensure the MVP_index column exists
   if ("MVP_index" %in% colnames(dataset)) {
-    # Find the row with the highest MVP_index
     max_row <- dataset[which.max(dataset$MVP_index), ]
     
-    # Extract relevant details (assuming a "Player" column exists)
-    mvp_entry <- data.frame(Year = year, 
-                            Player = max_row$Player, 
-                            MVP_index = max_row$MVP_index,
-                            stringsAsFactors = FALSE)
+    mvp_entry <- data.frame(
+      Year = year, 
+      Player = max_row$Player, 
+      MVP_index = max_row$MVP_index,
+      PTS = max_row$PTS,
+      AST = max_row$AST,
+      TRB = max_row$TRB,
+      BLK = max_row$BLK,
+      STL = max_row$STL,
+      WS = max_row$WS,
+      stringsAsFactors = FALSE
+    )
     
-    # Append to the mvp_table
     mvp_table <- rbind(mvp_table, mvp_entry)
   } else {
     stop(paste0("MVP_index column is missing in dataset for year ", year))
@@ -435,10 +436,15 @@ for (year in years) {
 }
 
 nba_master <- do.call(rbind, nba_list)
-write.csv(nba_master, "../data/nba_master.csv", row.names = FALSE)
+write.csv(nba_master, "../data/02-analysis_data/nba_master.csv", row.names = FALSE)
 
 
-
+merged_real_mvp <- merge(
+  Real_MVP_Data, 
+  nba_master[, c("Player", "Year", "MVP_index")],  # Select only relevant columns from nba_master
+  by = c("Player", "Year"), 
+  all.x = TRUE
+)
 
 
 ```
@@ -510,7 +516,7 @@ glm_model <- glm(MVP_index ~ PTS + AST + TRB + BLK + STL + WS, data = nba_master
 # View the summary of the model
 summary(lm_model)
 
-plot(lm_model)
+
 ```
 
 
@@ -531,10 +537,19 @@ Our results are summarized in @tbl-modelresults.
 #| warning: false
 #| message: false
 
-library(rstanarm)
-
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
+ggplot(mvp_table, aes(x = Year, y = MVP_index)) +
+  geom_point(color = "blue", size = 3, alpha = 0.7) +
+  labs(
+    title = "MVP Index Over the Years",
+    x = "Year",
+    y = "MVP Index"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14)
+  )
 ```
 
 ```{r}
