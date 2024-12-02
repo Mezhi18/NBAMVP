@@ -29,6 +29,7 @@ library(bayesplot)
 library(StanHeaders)
 library(Matrix)
 library(lme4)
+library(patchwork)
 
 ```
 
@@ -347,7 +348,7 @@ NBA2024[] <- lapply(NBA2024, type.convert, as.is = TRUE)
 
 
 ```{r}
-Real_MVP_Data <- read.csv("../NBAMVP/data/01-raw_data/NBA\\ MVPs/Real_MVP_Data.csv")
+Real_MVP_Data <- read.csv("../data/01-raw_data/NBA MVPs/Real_MVP_Data.csv")
 
 
 ```
@@ -441,10 +442,27 @@ write.csv(nba_master, "../data/02-analysis_data/nba_master.csv", row.names = FAL
 
 merged_real_mvp <- merge(
   Real_MVP_Data, 
-  nba_master[, c("Player", "Year", "MVP_index")],  # Select only relevant columns from nba_master
-  by = c("Player", "Year"), 
+  nba_master[, c("Player", "Age", "MVP_index")],  # Select only relevant columns from nba_master
+  by = c("Player", "Age"), 
   all.x = TRUE
 )
+
+merged_real_mvp <- merged_real_mvp %>%
+  mutate(
+    Year = case_when(
+      # If entry matches "YYYY-YY", extract the first 4 characters as the year
+      grepl("^\\d{4}-\\d{2}$", Season) ~ as.numeric(substr(Season, 1, 4)) + 1,
+      
+      # If entry matches "Mmm-YY", extract the last 2 characters, convert to 20YY, and add 1
+      grepl("^[a-zA-Z]{3}-\\d{2}$", Season) ~ as.numeric(paste0("20", substr(Season, 5, 6))) + 1,
+      
+      # Default: NA for non-matching formats
+      TRUE ~ NA_real_
+    )
+  )
+
+# Convert Year column to numeric
+merged_real_mvp$Year <- as.numeric(merged_real_mvp$Year)
 
 
 ```
@@ -537,19 +555,29 @@ Our results are summarized in @tbl-modelresults.
 #| warning: false
 #| message: false
 
-ggplot(mvp_table, aes(x = Year, y = MVP_index)) +
+ggplot(merged_real_mvp, aes(x = Year, y = MVP_index)) +
   geom_point(color = "blue", size = 3, alpha = 0.7) +
   labs(
-    title = "MVP Index Over the Years",
+    title = "Scatter: Year vs. MVP Index (Merged Real MVPs)",
     x = "Year",
     y = "MVP Index"
   ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14)
-  )
+  coord_cartesian(ylim = c(1.7, 2.8)) +  # Maintain the same y-axis range
+  theme_minimal()
+
+
+
+ggplot(mvp_table, aes(x = Year, y = MVP_index)) +
+  geom_point(color = "red", size = 3, alpha = 0.7) +
+  labs(
+    title = "Scatter: Year vs. MVP Index (MVP Table)",
+    x = "Year",
+    y = "MVP Index"
+  ) +
+  coord_cartesian(ylim = c(1.7, 2.8)) +  # Maintain the same y-axis range
+  theme_minimal()
+
+
 ```
 
 ```{r}
