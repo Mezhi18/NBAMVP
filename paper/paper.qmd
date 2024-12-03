@@ -17,6 +17,7 @@ toc: true
 #| include: false
 #| warning: false
 #| message: false
+#| echo: false
 
 library(tidyverse)
 library(dplyr)
@@ -30,6 +31,7 @@ library(StanHeaders)
 library(Matrix)
 library(lme4)
 library(patchwork)
+library(kableExtra)
 
 ```
 
@@ -72,6 +74,12 @@ Add graphs, tables and text. Use sub-sub-headings for each outcome variable or u
 Some of our data is of penguins (@fig-bills), from @palmerpenguins.
 
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
+#| echo: false
+
+
 # 1986
 NBA1986 <- read.csv("../data/01-raw_data/All NBA/AllNBA_1986.csv", header = FALSE)
 new_col_names <- as.character(unlist(NBA1986[2, ]))
@@ -348,6 +356,12 @@ NBA2024[] <- lapply(NBA2024, type.convert, as.is = TRUE)
 
 
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
+#| echo: false
+
+
 Real_MVP_Data <- read.csv("../data/01-raw_data/NBA MVPs/Real_MVP_Data.csv")
 
 
@@ -355,6 +369,11 @@ Real_MVP_Data <- read.csv("../data/01-raw_data/NBA MVPs/Real_MVP_Data.csv")
 
 
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
+#| echo: false
+
 
 # Years range
 years <- 1986:2024
@@ -471,22 +490,7 @@ Talk more about it.
 
 And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
 
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
-#| echo: false
-#| warning: false
-#| message: false
 
-analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
-
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
-```
 
 Talk way more about it. 
 
@@ -529,11 +533,26 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 
 ```{r}
 # Fit a linear regression model
-glm_model <- glm(MVP_index ~ PTS + AST + TRB + BLK + STL + WS, data = nba_master)
+lm_model <- lm(MVP_index ~ PTS + AST + TRB + BLK + STL + WS, data = nba_master)
 
 # View the summary of the model
 summary(lm_model)
 
+next_year_mvp_stats <- mvp_table %>%
+  filter(Year == 2024) %>%  # Replace with the target year
+  select(PTS, AST, TRB, BLK, STL, WS)
+
+# Predict MVP_index for the next year's MVP
+predicted_index_mvp_table <- predict(lm_model, newdata = next_year_mvp_stats)
+print(paste("Predicted MVP Index (mvp_table):", predicted_index_mvp_table))
+
+next_year_real_mvp_stats <- merged_real_mvp %>%
+  filter(Year == 2024) %>%  # Replace with the target year
+  select(PTS, AST, TRB, BLK, STL, WS)
+
+# Predict MVP_index for the next year's MVP
+predicted_index_real_mvp <- predict(lm_model, newdata = next_year_real_mvp_stats)
+print(paste("Predicted MVP Index (merged_real_mvp):", predicted_index_real_mvp))
 
 ```
 
@@ -544,6 +563,98 @@ We expect a positive relationship between the size of the wings and time spent a
 
 We can use maths by including latex between dollar signs, for instance $\theta$.
 
+### Model Results
+```{r}
+#| include: true
+#| warning: false
+#| message: false
+#| echo: false
+
+
+# Filter MVPs from 2014 to 2024 for both datasets
+mvp_table_filtered <- mvp_table %>%
+  filter(Year >= 2014 & Year <= 2024) %>%
+  select(Year, Player, MVP_index)
+
+real_mvp_filtered <- merged_real_mvp %>%
+  filter(Year >= 2014 & Year <= 2024) %>%
+  select(Year, Player, MVP_index)
+
+# Predict MVP index for 2025 and add it to both tables
+next_year_mvp_stats <- mvp_table %>%
+  filter(Year == 2024) %>%  # Use 2024 stats as proxy
+  select(PTS, AST, TRB, BLK, STL, WS)
+
+predicted_index_mvp_table <- NA
+if (nrow(next_year_mvp_stats) > 0) {
+  predicted_index_mvp_table <- predict(lm_model, newdata = next_year_mvp_stats)
+}
+
+mvp_table_filtered <- bind_rows(
+  mvp_table_filtered,
+  data.frame(
+    Year = 2025,
+    Player = "Predicted MVP",
+    MVP_index = predicted_index_mvp_table
+  )
+)
+
+next_year_real_mvp_stats <- merged_real_mvp %>%
+  filter(Year == 2024) %>%  # Use 2024 stats as proxy
+  select(PTS, AST, TRB, BLK, STL, WS)
+
+predicted_index_real_mvp <- NA
+if (nrow(next_year_real_mvp_stats) > 0) {
+  predicted_index_real_mvp <- predict(lm_model, newdata = next_year_real_mvp_stats)
+}
+
+real_mvp_filtered <- bind_rows(
+  real_mvp_filtered,
+  data.frame(
+    Year = 2025,
+    Player = "Predicted MVP",
+    MVP_index = predicted_index_real_mvp
+  )
+)
+
+# Rename columns for clarity
+mvp_table_filtered <- mvp_table_filtered %>%
+  rename(
+    `Simulated Data - Player` = Player,
+    `Simulated Data - MVP Index` = MVP_index
+  )
+
+real_mvp_filtered <- real_mvp_filtered %>%
+  rename(
+    `Historical Data - Player` = Player,
+    `Historical Data - MVP Index` = MVP_index
+  )
+
+# Join the two tables by Year
+combined_table <- full_join(
+  mvp_table_filtered,
+  real_mvp_filtered,
+  by = "Year"
+)
+
+# Create a styled table using kable
+combined_table %>%
+  kable(
+    format = "html",
+    caption = "Combined MVP Data (2014-2025)",
+    col.names = c(
+      "Year",
+      "Simulated Data - Player",
+      "Simulated Data - MVP Index",
+      "Historical Data - Player",
+      "Historical Data - MVP Index"
+    )
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F) %>%
+  add_header_above(c(" " = 1, "Simulated Data" = 2, "Historical Data" = 2))
+
+
+```
 
 # Results
 
@@ -580,20 +691,68 @@ ggplot(mvp_table, aes(x = Year, y = MVP_index)) +
 
 ```
 
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
 
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
+```{r}
+
+
+# Add a source column to the datasets
+mvp_table <- mvp_table %>%
+  mutate(Source = "Simulated MVPs")
+
+merged_real_mvp <- merged_real_mvp %>%
+  mutate(Source = "Historical MVPs")
+
+# Combine datasets
+combined_data <- bind_rows(
+  mvp_table %>% select(Year, PTS, TRB, AST, Source),
+  merged_real_mvp %>% select(Year, PTS, TRB, AST, Source)
 )
+
+# Plot for PTS
+pts_plot <- ggplot(combined_data, aes(x = Year, y = PTS, group = Source, color = Source)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_line(alpha = 0.7) +
+  facet_wrap(~ Source) +
+  labs(
+    title = "Year vs. PTS",
+    x = "Year",
+    y = "PTS"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Plot for TRB
+trb_plot <- ggplot(combined_data, aes(x = Year, y = TRB, group = Source, color = Source)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_line(alpha = 0.7) +
+  facet_wrap(~ Source) +
+  labs(
+    title = "Year vs. TRB",
+    x = "Year",
+    y = "TRB"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Plot for AST
+ast_plot <- ggplot(combined_data, aes(x = Year, y = AST, group = Source, color = Source)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_line(alpha = 0.7) +
+  facet_wrap(~ Source) +
+  labs(
+    title = "Year vs. AST",
+    x = "Year",
+    y = "AST"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Display plots separately
+print(pts_plot)
+print(trb_plot)
+print(ast_plot)
+
+
 ```
 
 
@@ -628,36 +787,13 @@ Weaknesses and next steps should also be included.
 
 ## Posterior predictive check
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
 
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
 
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
 
 ## Diagnostics
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
 
 ```{r}
 #| echo: false
@@ -669,9 +805,7 @@ posterior_vs_prior(first_model) +
 #| fig-subcap: ["Trace plot", "Rhat plot"]
 #| layout-ncol: 2
 
-plot(first_model, "trace")
 
-plot(first_model, "rhat")
 ```
 
 
