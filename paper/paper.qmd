@@ -75,11 +75,11 @@ As we collected data from each year since 1986 individually, we have utilized th
 
 As each year has an individual data set we took PTS, TRB, AST, BLK, STL,a nd WS took the average for that year and normalized each player's statistics by dividing them by the average of that year with this we have created the MVP Index which we have defined as:
 
-\$\$
+$$
 
-MVP\_{Index} = 0.8PTS\_{Norm} + 0.25AST\_{Norm} + 0.25TRB\_{Norm} + 0.1STL\_{Norm} + 0.1BLK\_{Norm} + 0.15WS\_{Norm}
+MVP_{Index} = 0.8PTS_{Norm} + 0.25AST_{Norm} + 0.25TRB_{Norm} + 0.1STL_{Norm} + 0.1BLK_{Norm} + 0.15WS_{Norm}
 
-\$\$
+$$
 
 With this `MVP Index` we have created our own list of who could have been MVP base on statistics for that year, essentially comparing how good the player was to othe rplayers in the basketball season.
 
@@ -87,16 +87,16 @@ With this `MVP Index` we have created our own list of who could have been MVP ba
 
 For our second set of date we have all MVPs since 1986 also sourced from [@bbref], and the variables that have been used are the following:
 
--   `Player:` The name of the NBA player.
--   `Year:` The year in which the player was selected as MVP.
--   `Tm:` The three letter designation for the NBA team the player played for the year.
--   `G:` Games played by the player.
--   `MP:` Minutes played per game.
--   `PTS:` Points per game.
--   `TRB:` Total Rebounds per game, including offensive and defensive rebounds.
--   `BLK:` Blocks per game
--   `STL:` Steals Per game
--   `WS:` The amount of wins allocated to the individual player
+-`Player:` The name of the NBA player.
+-`Year:` The year in which the player was selected as MVP.
+-`Tm:` The three letter designation for the NBA team the player played for the year.
+-`G:` Games played by the player.
+-`MP:` Minutes played per game.
+-`PTS:` Points per game.
+-`TRB:` Total Rebounds per game, including offensive and defensive rebounds.
+-`BLK:` Blocks per game
+-`STL:` Steals Per game
+-`WS:` The amount of wins allocated to the individual player
 
 ## Measurement
 
@@ -401,6 +401,7 @@ Real_MVP_Data <- read.csv("../data/01-raw_data/NBA MVPs/Real_MVP_Data.csv")
 
 ```
 
+
 ```{r}
 #| include: false
 #| warning: false
@@ -491,7 +492,6 @@ for (year in years) {
 nba_master <- do.call(rbind, nba_list)
 write.csv(nba_master, "../data/02-analysis_data/nba_master.csv", row.names = FALSE)
 
-
 merged_real_mvp <- merge(
   Real_MVP_Data, 
   nba_master[, c("Player", "Age", "MVP_index")],  # Select only relevant columns from nba_master
@@ -502,13 +502,8 @@ merged_real_mvp <- merge(
 merged_real_mvp <- merged_real_mvp %>%
   mutate(
     Year = case_when(
-      # If entry matches "YYYY-YY", extract the first 4 characters as the year
       grepl("^\\d{4}-\\d{2}$", Season) ~ as.numeric(substr(Season, 1, 4)) + 1,
-      
-      # If entry matches "Mmm-YY", extract the last 2 characters, convert to 20YY, and add 1
       grepl("^[a-zA-Z]{3}-\\d{2}$", Season) ~ as.numeric(paste0("20", substr(Season, 5, 6))) + 1,
-      
-      # Default: NA for non-matching formats
       TRUE ~ NA_real_
     )
   )
@@ -518,7 +513,6 @@ merged_real_mvp$Year <- as.numeric(merged_real_mvp$Year)
 
 
 ```
-
 
 
 # Model
@@ -533,8 +527,7 @@ Background details and diagnostics are included in [Appendix -@sec-model-details
 
 Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.
 
-```{=tex}
-\begin{align} 
+\begin{align}
 y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \mu_i &= \pi_i + \alpha_i + \rho_i + \beta_i + \xi_i + \omega_i \\
 \mu &\sim \mbox{Normal}(0, 2.5) \\
@@ -546,12 +539,13 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \omega &\sim \mbox{Normal}(0, 2.5) \\
 \sigma &\sim \mbox{Exponential}(1)
 \end{align}
-```
+
 
 
 
 
 ```{r}
+
 # create a linear regression model
 lm_model <- lm(MVP_index ~ PTS + AST + TRB + BLK + STL + WS, data = nba_master)
 
@@ -573,7 +567,6 @@ next_year_real_mvp_stats <- merged_real_mvp %>%
 # Predict MVP_index for the next year's MVP
 predicted_index_real_mvp <- predict(lm_model, newdata = next_year_real_mvp_stats)
 
-
 ```
 
 ### Model justification
@@ -583,6 +576,7 @@ We expect a positive relationship between the size of the wings and time spent a
 We can use maths by including latex between dollar signs, for instance $\theta$.
 
 ### Model Results
+
 
 ```{r}
 #| echo: false
@@ -657,24 +651,12 @@ combined_table <- full_join(
   by = "Year"
 )
 
-# Create a styled table using kable
-combined_table %>%
-  kable(
-    format = "latex",
-    booktabs = TRUE,
-    col.names = c(
-      "Year",
-      "Simulated Data - Player",
-      "Simulated Data - MVP Index",
-      "Historical Data - Player",
-      "Historical Data - MVP Index"
-    )
-  ) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F) %>%
-  add_header_above(c(" " = 1, "Simulated Data" = 2, "Historical Data" = 2))
+print(combined_table)
+
 
 
 ```
+
 
 # Results
 
