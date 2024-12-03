@@ -20,23 +20,18 @@ toc: true
 #| echo: false
 
 library(tidyverse)
+library(rstanarm)
 library(dplyr)
 library(janitor)
 library(lubridate)
 library(modelsummary)
-library(rstanarm)
 library(knitr)
-library(bayesplot)
 library(StanHeaders)
-library(Matrix)
-library(lme4)
-library(patchwork)
 library(kableExtra)
 
 ```
 
-
-# Introduction
+# Introduction {#sec-intro}
 
 Overview paragraph
 
@@ -48,30 +43,70 @@ Why it matters paragraph
 
 Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
 
-
-
-
-
-
 # Data {#sec-data}
 
 ## Overview
 
-We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
+We use the statistical programming language R [@citeR], as well as the following packages to help clean and manipulate our data, [@tidyverse], [@rstanarm], [@dplyr], [@janitor], [@lubridate], [@modelsummary], [@knitr], [@StanHeaders], [@kableExtra]. Using these packages we cleaned our data, added years for the data sets that only had seasons, referring to the basketball season, as well as helped create some nice tables, unlike the traditional R software can create.
 
-Overview text
+Our data was collected from [@bbref], we collected data from every player that received a vote for any All-NBA teams since 1986, this includes a vote cast for the First All-NBA Team, the Second All-NBA Team, and the Third All-NBA Team. As we believed that taking the players that received votes for the MVP awards would result in a smaller sample. We also created a new statistic call `MVP_Index` that will be defined in @sec-variables. In addition, we collected a data set for all NBA MVPs since 1986, so we could compare to the ones we have chosen with the `MVP_Index`.
+
+Following @tellingstories, we use techniques and methods from this text we have analyzed the data using models, graphs, tables and other methods of data analysis to conduct our research to find  players that could have been MVPs and what the MVP for the following years will look like(statistically). 
+
+
+## Variables {#sec-variables}
+
+### All NBA Variables
+
+As we collected data from each year since 1986 individually, we have utilized the following variables:
+
+-   `Team:` Whether the player was in the 1st, 2nd, or 3rd All NBA Teams or OVR if they did not make the top three teams but still received a vote.
+-   `Pos:` The player's position including the generalized positions G, F, C, for Guard, Forward, and Center respectively.
+-   `Player:` The name of the NBA player.
+-   `Age:` The age of the NBA player.
+-   `Tm:` The three letter designation for the NBA team the player played for the year.
+-   `G:` Games played by the player.
+-   `MP:` Minutes played per game.
+-   `PTS:` Points per game.
+-   `TRB:` Total Rebounds per game, including offensive and defensive rebounds.
+-   `BLK:` Blocks per game
+-   `STL:` Steals Per game
+-   `WS:` The amount of wins allocated to the individual player
+
+As each year has an individual data set we took PTS, TRB, AST, BLK, STL,a nd WS took the average for that year and normalized each player's statistics by dividing them by the average of that year with this we have created the MVP Index which we have defined as:
+
+\$\$
+
+MVP\_{Index} = 0.8PTS\_{Norm} + 0.25AST\_{Norm} + 0.25TRB\_{Norm} + 0.1STL\_{Norm} + 0.1BLK\_{Norm} + 0.15WS\_{Norm}
+
+\$\$
+
+With this `MVP Index` we have created our own list of who could have been MVP base on statistics for that year, essentially comparing how good the player was to othe rplayers in the basketball season.
+
+### Historical MVP Variable
+
+For our second set of date we have all MVPs since 1986 also sourced from [@bbref], and the variables that have been used are the following:
+
+-   `Player:` The name of the NBA player.
+-   `Year:` The year in which the player was selected as MVP.
+-   `Tm:` The three letter designation for the NBA team the player played for the year.
+-   `G:` Games played by the player.
+-   `MP:` Minutes played per game.
+-   `PTS:` Points per game.
+-   `TRB:` Total Rebounds per game, including offensive and defensive rebounds.
+-   `BLK:` Blocks per game
+-   `STL:` Steals Per game
+-   `WS:` The amount of wins allocated to the individual player
 
 ## Measurement
-	
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
 
-## Outcome variables
+Data collected in sports and more specifically basketball is rather simple. When an NBA game is being played there are people who's entire job is to keep track of a players statistics throughout the game, whenever a player makes a shot, or steals they ball it is being logged by that specific person. After the standard 82 games, there could be morte or less under different circumstances such ast COVID-19, injuries, or even trades all regular season statistics have been collected. As most of our in game statistics are based on the players 'per game' average, the total number of points blocks, etc., are recorded it is divided by the number of games the player played that season.
 
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
+## Outcome variable: MVP Index
+
+Our outcome variable is the same as our estimand in @sec-intro. As `MVP Index` is dependent on our other statistics, Points, Assists, Rebounds, Steals, Blocks, and Win Shares. As we are studying MVPs in our paper this is our Variable of interest ast it represents how good a player was in comparison to the other best players in the NBA that year, from the sample of players that have received any ALL NBA Team vote. 
 
 
-
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
 
 ```{r}
 #| include: false
@@ -354,7 +389,6 @@ colnames(NBA2024) <- new_col_names
 NBA2024[] <- lapply(NBA2024, type.convert, as.is = TRUE)
 ```
 
-
 ```{r}
 #| include: false
 #| warning: false
@@ -366,7 +400,6 @@ Real_MVP_Data <- read.csv("../data/01-raw_data/NBA MVPs/Real_MVP_Data.csv")
 
 
 ```
-
 
 ```{r}
 #| include: false
@@ -490,22 +523,13 @@ Talk more about it.
 
 And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
 
-
-
-Talk way more about it. 
+Talk way more about it.
 
 ## Predictor variables
 
 Add graphs, tables and text.
 
 Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
-
-
-
-
-
-
-
 
 # Model
 
@@ -515,8 +539,9 @@ Here we briefly describe the Bayesian analysis model used to investigate... Back
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.
 
+```{=tex}
 \begin{align} 
 y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \mu_i &= \pi_i + \alpha_i + \rho_i + \beta_i + \xi_i + \omega_i \\
@@ -529,6 +554,9 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \omega &\sim \mbox{Normal}(0, 2.5) \\
 \sigma &\sim \mbox{Exponential}(1)
 \end{align}
+```
+
+
 
 
 ```{r}
@@ -556,7 +584,6 @@ print(paste("Predicted MVP Index (merged_real_mvp):", predicted_index_real_mvp))
 
 ```
 
-
 ### Model justification
 
 We expect a positive relationship between the size of the wings and time spent aloft. In particular...
@@ -564,6 +591,7 @@ We expect a positive relationship between the size of the wings and time spent a
 We can use maths by including latex between dollar signs, for instance $\theta$.
 
 ### Model Results
+
 ```{r}
 #| include: true
 #| warning: false
@@ -691,7 +719,6 @@ ggplot(mvp_table, aes(x = Year, y = MVP_index)) +
 
 ```
 
-
 ```{r}
 
 
@@ -755,14 +782,11 @@ print(ast_plot)
 
 ```
 
-
-
-
 # Discussion
 
 ## First discussion point {#sec-first-point}
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this.
 
 ## Second discussion point
 
@@ -778,8 +802,7 @@ Weaknesses and next steps should also be included.
 
 \appendix
 
-# Appendix {-}
-
+# Appendix {.unnumbered}
 
 # Additional data details
 
@@ -787,13 +810,7 @@ Weaknesses and next steps should also be included.
 
 ## Posterior predictive check
 
-
-
-
-
 ## Diagnostics
-
-
 
 ```{r}
 #| echo: false
@@ -808,11 +825,6 @@ Weaknesses and next steps should also be included.
 
 ```
 
-
-
 \newpage
 
-
 # References
-
-
