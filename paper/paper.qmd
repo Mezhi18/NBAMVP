@@ -660,7 +660,8 @@ combined_table <- full_join(
 # Create a styled table using kable
 combined_table %>%
   kable(
-    format = "html",
+    format = "latex",
+    booktabs = TRUE,
     col.names = c(
       "Year",
       "Simulated Data - Player",
@@ -710,6 +711,7 @@ ggplot(merged_data, aes(x = Year, y = MVP_index, group = Source)) +
 
 
 ```
+
 
 ```{r}
 #| echo: false
@@ -829,16 +831,7 @@ Weaknesses and next steps should also be included.
 # Model details {#sec-model-details}
 
 ```{r}
-# Extract the summary of the model
 lm_summary <- summary(lm_model)
-
-# Extract coefficients as a data frame
-coef_table <- as.data.frame(lm_summary$coefficients)
-colnames(coef_table) <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
-
-# Create the kable table
-kable(coef_table, caption = "Linear Regression Model Coefficients") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
 
 print(lm_summary)
 ```
