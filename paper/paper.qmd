@@ -519,23 +519,15 @@ merged_real_mvp$Year <- as.numeric(merged_real_mvp$Year)
 
 ```
 
-Talk more about it.
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
-Talk way more about it.
-
-## Predictor variables
-
-Add graphs, tables and text.
-
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
 
 # Model
 
-The goal of our modelling strategy is twofold. Firstly,...
+The goal of our modelling strategy is twofold. Firstly, we will be using a linear regression model to predict the MVP Index of the mvp in the following year regardless of the player. This will tell us how much better we can expect the 2025 MVP to be compared to his fellow NBA players. Secondly, We will use another data set we have created by selecting players that had the highest MVP index in their respective year whether they had won MVP or not. So, Using both these predictions we will be able to compare whether we believe the player with the highest MVP index will in fact be the next NBA MVP.
 
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+Here we briefly describe the Linear analysis model used to investigate what the MVP Index of the next NBA MVP will be. For our model we will use collected data describe in @sec-data.
+
+Background details and diagnostics are included in [Appendix -@sec-model-details].
 
 ## Model set-up
 
@@ -560,7 +552,7 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 
 
 ```{r}
-# Fit a linear regression model
+# create a linear regression model
 lm_model <- lm(MVP_index ~ PTS + AST + TRB + BLK + STL + WS, data = nba_master)
 
 # View the summary of the model
@@ -580,7 +572,7 @@ next_year_real_mvp_stats <- merged_real_mvp %>%
 
 # Predict MVP_index for the next year's MVP
 predicted_index_real_mvp <- predict(lm_model, newdata = next_year_real_mvp_stats)
-print(paste("Predicted MVP Index (merged_real_mvp):", predicted_index_real_mvp))
+
 
 ```
 
@@ -593,11 +585,11 @@ We can use maths by including latex between dollar signs, for instance $\theta$.
 ### Model Results
 
 ```{r}
-#| include: true
+#| echo: false
 #| warning: false
 #| message: false
-#| echo: false
-
+#| label: fig-modeltable
+#| fig-cap: "Historical MVP and Player with highest MVP Index since 2014"
 
 # Filter MVPs from 2014 to 2024 for both datasets
 mvp_table_filtered <- mvp_table %>%
@@ -669,7 +661,6 @@ combined_table <- full_join(
 combined_table %>%
   kable(
     format = "html",
-    caption = "Combined MVP Data (2014-2025)",
     col.names = c(
       "Year",
       "Simulated Data - Player",
@@ -690,37 +681,42 @@ Our results are summarized in @tbl-modelresults.
 
 ```{r}
 #| echo: false
-#| eval: true
 #| warning: false
 #| message: false
+#| label: fig-mvpindex
+#| fig-cap: "MVP index of of Historical and simulated MVPs"
 
-ggplot(merged_real_mvp, aes(x = Year, y = MVP_index)) +
-  geom_point(color = "blue", size = 3, alpha = 0.7) +
+merged_data <- bind_rows(
+  merged_real_mvp %>% mutate(Source = "Historical MVPs"),
+  mvp_table %>% mutate(Source = "Simulated MVPs")
+)
+
+# Create the faceted plot with lines connecting points
+ggplot(merged_data, aes(x = Year, y = MVP_index, group = Source)) +
+  geom_line(aes(color = Source), size = 1, alpha = 0.7) +  # Add lines connecting points
+  geom_point(aes(color = Source), size = 3, alpha = 0.7) +  # Keep the points
+  facet_wrap(~ Source, ncol = 2) +  # Facet by the Source column, side by side
   labs(
-    title = "Scatter: Year vs. MVP Index (Merged Real MVPs)",
+    title = "Scatter: Year vs. MVP Index",
     x = "Year",
     y = "MVP Index"
   ) +
   coord_cartesian(ylim = c(1.7, 2.8)) +  # Maintain the same y-axis range
-  theme_minimal()
-
-
-
-ggplot(mvp_table, aes(x = Year, y = MVP_index)) +
-  geom_point(color = "red", size = 3, alpha = 0.7) +
-  labs(
-    title = "Scatter: Year vs. MVP Index (MVP Table)",
-    x = "Year",
-    y = "MVP Index"
-  ) +
-  coord_cartesian(ylim = c(1.7, 2.8)) +  # Maintain the same y-axis range
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    legend.position = "none",  # Remove the legend since it's redundant with faceting
+    strip.text = element_text(size = 12, face = "bold")
+  )
 
 
 ```
 
 ```{r}
-
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-pts
+#| fig-cap: "MVP PPG over Time"
 
 # Add a source column to the datasets
 mvp_table <- mvp_table %>%
@@ -741,7 +737,6 @@ pts_plot <- ggplot(combined_data, aes(x = Year, y = PTS, group = Source, color =
   geom_line(alpha = 0.7) +
   facet_wrap(~ Source) +
   labs(
-    title = "Year vs. PTS",
     x = "Year",
     y = "PTS"
   ) +
@@ -754,7 +749,6 @@ trb_plot <- ggplot(combined_data, aes(x = Year, y = TRB, group = Source, color =
   geom_line(alpha = 0.7) +
   facet_wrap(~ Source) +
   labs(
-    title = "Year vs. TRB",
     x = "Year",
     y = "TRB"
   ) +
@@ -767,7 +761,6 @@ ast_plot <- ggplot(combined_data, aes(x = Year, y = AST, group = Source, color =
   geom_line(alpha = 0.7) +
   facet_wrap(~ Source) +
   labs(
-    title = "Year vs. AST",
     x = "Year",
     y = "AST"
   ) +
@@ -776,11 +769,38 @@ ast_plot <- ggplot(combined_data, aes(x = Year, y = AST, group = Source, color =
 
 # Display plots separately
 print(pts_plot)
-print(trb_plot)
-print(ast_plot)
+
+
 
 
 ```
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-reb
+#| fig-cap: "MVP RPG over Time"
+
+print(trb_plot)
+```
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-ast
+#| fig-cap: "MVP ASG over Time"
+
+print(ast_plot)
+```
+
+
+
+
+
 
 # Discussion
 
@@ -807,6 +827,22 @@ Weaknesses and next steps should also be included.
 # Additional data details
 
 # Model details {#sec-model-details}
+
+```{r}
+# Extract the summary of the model
+lm_summary <- summary(lm_model)
+
+# Extract coefficients as a data frame
+coef_table <- as.data.frame(lm_summary$coefficients)
+colnames(coef_table) <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
+
+# Create the kable table
+kable(coef_table, caption = "Linear Regression Model Coefficients") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+
+print(lm_summary)
+```
+
 
 ## Posterior predictive check
 
