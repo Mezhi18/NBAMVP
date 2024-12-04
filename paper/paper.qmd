@@ -6,7 +6,7 @@ author:
 thanks: "Code and data are available at: [https://github.com/Mezhi18/NBAMVP.]"
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This paper examines the methodology behind the NBA’s Most Valuable Player (MVP) award, introducing the MVP Index as a data-driven measure to evaluate player performance. The MVP Index combines key statistics, including points, assists, rebounds, and win shares, to provide a comprehensive metric of value. Using historical data and statistical modeling, we identify discrepancies between actual MVP winners and those with the highest MVP Index, highlighting the influence of narrative and qualitative factors on voting outcomes. The findings underscore the need for greater transparency and consistency in the MVP selection process while offering a framework for more objective evaluations."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -33,15 +33,15 @@ library(kableExtra)
 
 # Introduction {#sec-intro}
 
-Overview paragraph
+Basketball’s Most Valuable Player (MVP) award represents one of the most prestigious accolades in professional sports, honoring the individual deemed to have contributed the most to their team’s success over a season. While the selection process has traditionally relied on expert voting and narrative-driven narratives, the question of whether the MVP truly reflects a player's value remains open to debate. This paper seeks to address this issue by evaluating the award through a data-driven lens, introducing the MVP Index as a novel measure of player impact. By exploring historical trends, inconsistencies, and predictive modeling, this research aims to shed light on how MVP selections align—or fail to align—with statistical measures of excellence.
 
-Estimand paragraph
+At the heart of this analysis is the estimand, the MVP Index, which combines key player performance metrics into a single, normalized statistic. This index incorporates points, assists, rebounds, blocks, steals, and win shares, weighted to reflect their relative importance. The MVP Index provides a quantitative foundation for evaluating player performance, offering an alternative to the sometimes subjective criteria that influence MVP voting. The study employs statistical modeling, with linear regression used to predict the MVP Index for future seasons, enabling a comparison between the players with the best statistical performance and those who ultimately win the award.
 
-Results paragraph
+The results of the analysis reveal several significant insights. In some seasons, the MVP Index aligns closely with the actual MVP winner, validating the selection process. However, there are also notable discrepancies, where players with superior statistical performances were overlooked in favor of candidates with compelling narratives or team success factors. These findings suggest that while data can provide clarity, the MVP award is often shaped by qualitative elements that extend beyond pure statistics.
 
-Why it matters paragraph
+Understanding these patterns is not only critical for fans and analysts but also holds implications for broader debates about transparency and fairness in sports. The MVP award significantly impacts player legacies, influencing Hall of Fame considerations, sponsorship deals, and even contract negotiations. A more robust and transparent framework for assessing MVP candidates could enhance the credibility of the award and ensure that it reflects the contributions of players who truly make a difference.
 
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
+The remainder of this paper is structured as follows. @sec-data outlines the data sources, variables and processing steps that were use to help construct our very own `MVP Index`. Next, @sec-model  talks about our model and how it was developped as well as how we are using it to predict the future statistics. Then, @sec-results, we analyze MVP statistics over that nearly 40 years and how they have changed over time and highlights important discrepancies between our model and past MVPs. Lastly, @sec-discussion discusses the broader implications of these findings and acknowledges the paper's limitations. 
 
 # Data {#sec-data}
 
@@ -476,6 +476,8 @@ for (year in years) {
   }
 }
 
+write.csv(mvp_table, "../data/02-analysis_data/mvp_table.csv", row.names = FALSE)
+
 nba_list <- list()
 
 for (year in years) {
@@ -508,10 +510,11 @@ merged_real_mvp <- merged_real_mvp %>%
 merged_real_mvp$Year <- as.numeric(merged_real_mvp$Year)
 
 
+
 ```
 
 
-# Model
+# Model {#sec-model}
 
 The goal of our modelling strategy is twofold. Firstly, we will be using a linear regression model to predict the MVP Index of the mvp in the following year regardless of the player. This will tell us how much better we can expect the 2025 MVP to be compared to his fellow NBA players. Secondly, We will use another data set we have created by selecting players that had the highest MVP index in their respective year whether they had won MVP or not. So, Using both these predictions we will be able to compare whether we believe the player with the highest MVP index will in fact be the next NBA MVP.
 
@@ -566,11 +569,12 @@ next_year_real_mvp_stats <- merged_real_mvp %>%
 # Predict MVP_index for the next year's MVP
 predicted_index_real_mvp <- predict(lm_model, newdata = next_year_real_mvp_stats)
 
+saveRDS(lm_model, "../models/lm_model.rds")
 ```
 
 ### Model justification
 
-We expect a positive relationship between Between MVP Index and points, assists, rebounds, block, steals and win shares, as as these are all variables that define the MVP Index. In addition we expect a positive relationship as all of these statitcs indicate a good player, the larger anyone of these stats stats are the larger the MVP Index will be for the respective player. Just because a player does not aquire many block or many asists does not mean a player will have a low MVP rating, this just mean they will have to compensate with their other stats.
+We expect a positive relationship between Between MVP Index and points, assists, rebounds, block, steals and win shares, as as these are all variables that define the MVP Index. In addition we expect a positive relationship as all of these statitcs indicate a good player, the larger anyone of these stats stats are the larger the MVP Index will be for the respective player. Just because a player does not aquire many block or many asists does not mean a player will have a low MVP rating, this just mean they will have to compensate with their other stats. we can also see in @sec-model-details that we have a p-value of less than $2.2 \times 10^{-16}$, which is very low and gives us confidence the the model is accurate.
 
 ### Model Results
 
@@ -656,9 +660,9 @@ print(combined_table)
 
 
 ```
-As we have learned from @tbl-model results and which we can see in @tbl-index it is obvious that the MVP is not always the player that performs the best statistically, as LeBron James would have won 8 MVP awards before entering the 2013-2014 season, which would be 8 MVP awards in 10 years. Therefore, there must other factors excluding the statistics we were looking at, such as human error or prejudice, team success, and overall story telling which we will look further into in @sec-discussion.
+As we have learned from @tbl-modelresults and which we can see in @sec-index it is obvious that the MVP is not always the player that performs the best statistically, as LeBron James would have won 8 MVP awards before entering the 2013-2014 season, which would be 8 MVP awards in 10 years. Therefore, there must other factors excluding the statistics we were looking at, such as human error or prejudice, team success, and overall story telling which we will look further into in @sec-discussion.
 
-# Results
+# Results {#sec-results}
 
 In this section we will be taking a look at some statistics since 1986, starting with MVP index, the moving on to PPG, the RPG, and lastly we will look at APG. In these graphs we will be looking at Historical MVPs as well as players from each year with the highest MVP index. Analyzing these graphs will help us will help us understand how these stats developped through time among the best of the best in the NBA and potentially which statistics are valued more in real life than in the real MVP race.
 
@@ -764,7 +768,9 @@ print(pts_plot)
 
 ```
 
-We will no be looking at @fig-pts where we are looking at MVP's points per game through the years. As this graph is similar to @fig-mvpindex in the sense that then numbers do seem to be bouncing around although here we see that they do not seem to be converging around a single point. Although in this grapgh we see something interesting as well, Both Simulated MVs and Historical MVPs there seems to be an increasing baseline as well as an increasing top line, while the points are bouncing up and down through the years there along the top data points and the bottom data points, excluding Steve Nash, the only player to win MVP while scoring under 20ppg since 1986, who we discussed in @sec-mvp-index. The interesting thing is that this occurs in both graphs, this tells us that as the years go on the points scored by MVPs, even those who tend to score less are increasing this can be confirmed in a the paper @yan.
+We will no be looking at @fig-pts where we are looking at MVP's points per game through the years. As this graph is similar to @fig-mvpindex in the sense that then numbers do seem to be bouncing around although here we see that they do not seem to be converging around a single point. Although in this grapgh we see something interesting as well, Both Simulated MVs and Historical MVPs there seems to be an increasing baseline as well as an increasing top line, while the points are bouncing up and down through the years there along the top data points and the bottom data points, excluding Steve Nash, the only player to win MVP while scoring under 20ppg since 1986, who we discussed in @sec-mvp-index. The interesting thing is that this occurs in both graphs, this tells us that as the years go on the points scored by MVPs, even those who tend to score less are increasing this can be confirmed in a the paper [@yan].
+
+
 
 
 ## RPG since 1986
@@ -778,7 +784,8 @@ We will no be looking at @fig-pts where we are looking at MVP's points per game 
 
 print(trb_plot)
 ```
-In @fig-reb we are considering at rebounds per game. This gives us some additionnal information on the type of MVPs and what was prioritized at which points in time. We can see that there is a significant dip between the mid 2000s and the mid 2010s when we lokmat Historical Data and simulated MVPs there is a lack of 'Big Men', Centers and Power Forwards, they are often the players with the most rebounds on a given team espcially until the late 2010s
+In @fig-reb we are considering at rebounds per game. This gives us some additional information on the type of MVPs and what was prioritized at which points in time. We can see that there is a significant dip between the mid 2000s and the mid 2010s when we look at Historical Data and simulated MVPs there is a lack of 'Big Men', Centers and Power Forwards, as they are often the players with the most rebounds on a given team especially until the late 2010s, when smaller players such as Russell Westbrook Began recording more more rebounds. During this time there seems to be a vacuum of elite big men, from Shaquille O'neal, Tim Duncan, and Kevin Garnett in the early 2000s to the void we see above until the late 2010s and early 2020s where Giannis Antetekumpo, Nikola Jokic, and Joel Embiid rose to power and one of the three previously mentioned players won the MVP award in the last 6 years, which is why we can see the big jump in rebounds in the last few years of the graphs.
+
 
 ## APG since 1986
 
@@ -792,26 +799,41 @@ In @fig-reb we are considering at rebounds per game. This gives us some addition
 print(ast_plot)
 ```
 
-
+Lastly we will be looking at @fig-ast in which we graph assists per game over time since 1986. Just as in @fig-reb we have a dip in assists per game among MVPs and Simulated MVPs in which the assists per game in the 1990s and the early 2000s, where big men, while know for their rebounds and not so much for their assists were dominating the league. While we see a gradual increase in the 2020s and 2020s with the small outlier of Joel Embiid in 2023. After looking at these last few visuals we can come to the conclusion that each of these statistics seem to have a somewhat of a growing trend whether consistent or not it does seem to exists, we can come to the conclusions that MVPs in the modern NBA are more likely to be selected if they are a well rounded player, a player that score a lot of points, rebound the ball, and be an unselfish player by by passing the ball a lot especially in scoring situations.
 
 
 
 
 # Discussion {#sec-discussion}
 
-## First discussion point {#sec-first-point}
+## Human Error and Bias {#sec-bias}
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this.
+We must remember that at the end of the day the MVP is selected by a group of NBA analysts that come together once a year and cast their ballot for who they think the MVP should be. We must also remember that the award is called the 'Most Valuable Player' Award and not the 'Best Player' Award indicating that the player that should be selected is more valuable to their team than any other player. As people are deciding the player to receive these awards, it is good as they are able to take into account quantifiable and intangibles that machines would not, such as leadership, teammate morale, on-court behavior, off-court behavior and many more attributes that could affect their vote, as a machine would likely create a and MVP Index not completely unlike ours and choose the highest or lowest number depending on how it is measured.On the other hand, humans are extremely prone to bias, for example Stephen Curry was named the first unanimous  MVP in 2016 when he received all 131 votes cast that year, while in 2013 LeBron James received 120 out of 121 votes, the last vote went to Carmelo Anthony, who did not have a bad year by any means, but LeBron's Greatness that year was undeniable. Lebron's incredible statistical performance that year was one thing to behold, but he would go on to win his second NBA championship against one the most put together teams ever assembled. This shows that no matter how uncorrupt and trust worthy a set of analysts may seem they are human at the end of the day and are prone to error at the least and bias at the worst.
 
-## Second discussion point
+Sometimes choosing an mvp that would make a good story and in utn make the NBA more money also occasionally happens, for example when derrick rose won the MVP award in 2011 few people would make the statement that he was the best player in the world, as in almost every statistical category Lebron James was superior and Lebron's team, the Miami Heat, had more playoff success that year. An additional point, Derrick rose was the home town hero in Chicago, after growing in the windy city he was drafted by his hometown team, and attempted to regain the success the team had in the !990s with Michael Jordan. This makes an incredible story.
 
-Please don't use these as sub-heading labels - change them to be what your point actually is.
+## Consistency vs. Peak Performance {#sec-peak}
 
-## Third discussion point
+Averages do not show everything. It is possible for a player to be incredibly inconsistent for their team, playing well against weaker opponents while struggling against stronger ones. This could lead to impressive average stats that fail to reflect their performance when the team needed them most. On the other hand, peak performance, where a player dominates in key moments, often captures attention and can overshadow an otherwise inconsistent season. The MVP debate often centers around this tension between reliability and brilliance.A player who delivers steady, high-level contributions throughout the season provides a reliable foundation for their team’s success. These players might not always have headline-grabbing moments, but their ability to perform well in nearly every game can be the difference between making the playoffs or falling short. Their contributions build trust among teammates and coaches, as they can be relied upon to deliver in critical situations time and time again.
 
-## Weaknesses and next steps
+In contrast, players who showcase moments of sheer brilliance often become the face of the league. These athletes might not exhibit the same game-to-game reliability, but their ability to dominate in spectacular fashion leaves a lasting impression on fans and voters alike. Peak performers can change the momentum of a season with game-winning shots, record-breaking performances, or memorable battles against top opponents. However, their inconsistency can leave teams vulnerable during less-publicized matchups or critical stretches of the season.Ultimately, the MVP conversation remains an evolving debate, shaped by both quantitative measures and subjective interpretations of what makes a player "most valuable."
 
-Weaknesses and next steps should also be included.
+
+## Voting Methodology and Transparency {#sec-method}
+
+The voting methodology and transparency in the NBA, particularly for awards like the MVP, have significant implications for the league’s credibility and fan engagement. The MVP award is determined by a panel of sportswriters and broadcasters from the United States and Canada, with each voter ranking their top five candidates. Points are assigned on a weighted scale, and the player with the highest total is named MVP. While this system allows for expert analysis, transparency remains a recurring discussion point. Critics often call for more public access to the detailed ballots to ensure accountability and minimize potential biases. The NBA has made strides in recent years by releasing voters’ choices post-award, fostering a culture of openness. However, debates about the inclusion of diverse perspectives, potential regional biases, and the weight given to narrative versus statistical performance continue to shape the conversation around fairness and transparency in the voting process.
+
+## Weaknesses and next steps {#sec-weak}
+
+First, what would have been ideal especially in terms of using our model, would have been to take players from the all 3 All NBA teams, and download the data from these players and have our model analyze the data so we would have an actual name of a player for our predicted MVP Index and not just the score. While this would have been great time constraints and other external factors hindered us from implementing this further analysis.
+
+Second, for a more accurate MVP Index we could have sampled the entire league instead of the top 20-30 players, as this would have made a more accurate model as well as made the great players look much more exceptional with regards to the MVP Index, as we have only sampled players who have received at least one vote for an All NBA team, this leads to the average statistics we used to normalize our stats. This ended up making the Phenomenal players look great, and the great players look average, and the good players look sub par. 
+
+Next, team records are also incredibly important for MVP, if a player played incredibly one season but barely made the playoffs, or even did not at all, the player likely should not be receiving the MVP award, as how much worse could said team get if they weren't that good with the so called "best" player in the league. Unfortunately we were notable to inclue team record, team win percentage, or even player win percentage if we do not want to include the games a player may have missed. Unfortunately this data was not included in either type of data set that we sourced from [@bbref], and due to time constraints downloading potentially dozens if not hundreds additional data sets did not seem to be the best use of time in our case.
+
+Lastly, as mentioned in @sec-bias the MVP award does not solely rely on statistics and quantifiable factors. While, stats are heavily used in the decision for choosing the MVP there are other. non tangible factors that must be taken into account, other wise incredibly selfish players who do not help their teams have a much higher chance of winning.
+
+Our next steps, would like be to monitor this NBA season closely potentially add some of the data mentioned earlier in @sec-weak, such as win percentage, and individual historical statistics to more accurate predict the model. We would also like to revisit this paper tat the end of this NBA season once the NBA awards are announced and see how we could improve our model and how accurate it was in predicting the MVP Index of the next MVP.
 
 \newpage
 
@@ -819,17 +841,50 @@ Weaknesses and next steps should also be included.
 
 # Appendix {.unnumbered}
 
-# MVP Table By MVP Index
+# Surveys, Sampling, and Observational Data
+
+## Overview of MVP Voting Methodology
+
+The MVP award voting process relies on a panel of sportswriters and broadcasters across the United States and Canada, with each voter ranking their top five players. The point system allocates 10 points for a first-place vote, 7 for second, 5 for third, 3 for fourth, and 1 for fifth. The player with the highest total points is named the MVP. While this system ensures broad coverage across media markets, it introduces potential biases rooted in the selection of voters, the weighting system, and the lack of transparency in the criteria used by individual voters.
+
+## Observational Nature of NBA Data
+
+MVP voting data is inherently observational, reflecting subjective decisions rather than controlled experiments. This reliance on subjective assessments introduces variability, as voters may prioritize narrative driven criteria such as team success, leadership, or memorable moments over statistical performance. Observational data like this cannot account for unmeasured factors, such as voters’ implicit biases or media-driven narratives. Additionally, players on historically successful teams or those in larger markets may receive disproportionate attention, skewing the outcomes.
+
+## Sampling Representation of Voters
+
+The panel of voters is not a random sample of all stakeholders in the NBA community. Instead, it is a curated group of media professionals, which may underrepresent certain perspectives, such as fans, coaches, or analytics experts. This introduces a potential sampling bias that could influence the results. For example, regional biases might favor players from large-market teams, while recency bias could elevate players with late-season surges. Simulation studies could explore the extent of these biases by randomly reweighting votes or introducing new voter segments, e.g., analytics specialists.
+
+##Simulation of MVP Voting Under Different Scenarios
+
+To examine the robustness of MVP outcomes, simulations were conducted to evaluate how changes to the voting methodology could influence results. For instance, adjusting the weight given to statistical performance in vote tallies revealed several seasons where the MVP Index-aligned winner differed from the historically selected MVP. Similarly, experimenting with alternative weighting schemes, such as assigning equal points for all top-five rankings instead of a tiered system, led to notable shifts in the final outcomes. These simulations highlight the significant role that methodological choices play in shaping MVP selections, showing that even small adjustments can result in different winners. By simulating different voting scenarios, it becomes clear that the current system is sensitive to how votes are counted and weighted, underscoring the need for transparency and careful consideration of methodology.
+
+# Table By MVP Index {#sex-index}
 
 ```{r}
-#| echo: false
+#| include: true
 #| warning: false
 #| message: false
-#| label: tbl-index
-#| fig-cap: "Potential MVPs By Index"
+#| echo: false
 
 print(mvp_table)
 ```
+
+# Historical MVPs
+
+```{r}
+#| include: true
+#| warning: false
+#| message: false
+#| echo: false
+
+Real_MVP_Datas <- Real_MVP_Data[-c(1, nrow(Real_MVP_Data)), ]
+
+write.csv(Real_MVP_Datas, "../data/02-analysis_data/Real_MVP_Datas.csv", row.names = FALSE)
+
+print(Real_MVP_Datas)
+```
+
 
 
 # Model details {#sec-model-details}
@@ -843,6 +898,7 @@ lm_summary <- summary(lm_model)
 
 print(lm_summary)
 ```
+
 
 
 
