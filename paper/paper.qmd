@@ -871,7 +871,7 @@ MVP voting data is inherently observational, reflecting subjective decisions rat
 
 The panel of voters is not a random sample of all stakeholders in the NBA community. Instead, it is a curated group of media professionals, which may underrepresent certain perspectives, such as fans, coaches, or analytics experts. This introduces a potential sampling bias that could influence the results. For example, regional biases might favor players from large-market teams, while recency bias could elevate players with late-season surges. Simulation studies could explore the extent of these biases by randomly reweighting votes or introducing new voter segments, e.g., analytics specialists.
 
-##Simulation of MVP Voting Under Different Scenarios
+## Simulation of MVP Voting Under Different Scenarios
 
 To examine the robustness of MVP outcomes, simulations were conducted to evaluate how changes to the voting methodology could influence results. For instance, adjusting the weight given to statistical performance in vote tallies revealed several seasons where the MVP Index-aligned winner differed from the historically selected MVP. Similarly, experimenting with alternative weighting schemes, such as assigning equal points for all top-five rankings instead of a tiered system, led to notable shifts in the final outcomes. These simulations highlight the significant role that methodological choices play in shaping MVP selections, showing that even small adjustments can result in different winners. By simulating different voting scenarios, it becomes clear that the current system is sensitive to how votes are counted and weighted, underscoring the need for transparency and careful consideration of methodology.
 
