@@ -1,89 +1,62 @@
 #### Preamble ####
-# Purpose: Tests the structure and validity of the simulated Australian 
-  #electoral divisions dataset.
-# Author: Rohan Alexander
-# Date: 26 September 2024
-# Contact: rohan.alexander@utoronto.ca
+# Purpose: Tests the structure of MVP Data
+# Author: Yan Mezhiborsky
+# Date: 3 December 2024
+# Contact: yan.mezhiborskyr@utoronto.ca
 # License: MIT
-# Pre-requisites: 
-  # - The `tidyverse` package must be installed and loaded
-  # - 00-simulate_data.R must have been run
-# Any other information needed? Make sure you are in the `starter_folder` rproj
+# Pre-requisites: The `tidyverse` package must be installed
+
+
+
+#### Workspace setup ####
+library(tidyverse)
+set.seed(618)
 
 
 #### Workspace setup ####
 library(tidyverse)
 
-analysis_data <- read_csv("data/00-simulated_data/simulated_data.csv")
 
-# Test if the data was successfully loaded
-if (exists("analysis_data")) {
-  message("Test Passed: The dataset was successfully loaded.")
-} else {
-  stop("Test Failed: The dataset could not be loaded.")
-}
 
 
 #### Test data ####
 
-# Check if the dataset has 151 rows
-if (nrow(analysis_data) == 151) {
-  message("Test Passed: The dataset has 151 rows.")
-} else {
-  stop("Test Failed: The dataset does not have 151 rows.")
+test_dataset <- function(dataset, year) {
+  required_columns <- c("Player", "Age", "PTS", "AST", "TRB", "STL", "BLK", "WS", "MVP_index")
+  missing_columns <- setdiff(required_columns, colnames(dataset))
+  if (length(missing_columns) > 0) {
+    stop(paste("Dataset for year", year, "is missing columns:", paste(missing_columns, collapse = ", ")))
+  }
+  if (any(is.na(dataset$MVP_index))) {
+    stop(paste("Dataset for year", year, "contains missing values in MVP_index"))
+  }
+  if (any(duplicated(dataset$Player))) {
+    stop(paste("Dataset for year", year, "contains duplicate player entries"))
+  }
+  if (any(dataset$MVP_index < 0)) {
+    stop(paste("Dataset for year", year, "contains negative MVP_index values"))
+  }
+  return(TRUE)
 }
 
-# Check if the dataset has 3 columns
-if (ncol(analysis_data) == 3) {
-  message("Test Passed: The dataset has 3 columns.")
-} else {
-  stop("Test Failed: The dataset does not have 3 columns.")
+for (year in 1986:2024) {
+  dataset_name <- paste0("NBA", year)
+  dataset <- get(dataset_name)
+  test_dataset(dataset, year)
 }
 
-# Check if all values in the 'division' column are unique
-if (n_distinct(analysis_data$division) == nrow(analysis_data)) {
-  message("Test Passed: All values in 'division' are unique.")
-} else {
-  stop("Test Failed: The 'division' column contains duplicate values.")
+if (!all(c("Year", "Player", "PTS", "AST", "TRB", "STL", "BLK", "WS", "MVP_index") %in% colnames(nba_master))) {
+  stop("nba_master dataset is missing required columns")
 }
 
-# Check if the 'state' column contains only valid Australian state names
-valid_states <- c("New South Wales", "Victoria", "Queensland", "South Australia", 
-                  "Western Australia", "Tasmania", "Northern Territory", 
-                  "Australian Capital Territory")
-
-if (all(analysis_data$state %in% valid_states)) {
-  message("Test Passed: The 'state' column contains only valid Australian state names.")
-} else {
-  stop("Test Failed: The 'state' column contains invalid state names.")
+if (any(is.na(nba_master))) {
+  stop("nba_master dataset contains missing values")
 }
 
-# Check if the 'party' column contains only valid party names
-valid_parties <- c("Labor", "Liberal", "Greens", "National", "Other")
-
-if (all(analysis_data$party %in% valid_parties)) {
-  message("Test Passed: The 'party' column contains only valid party names.")
-} else {
-  stop("Test Failed: The 'party' column contains invalid party names.")
+if (!all(merged_real_mvp$Year %in% 1986:2025)) {
+  stop("merged_real_mvp contains invalid years")
 }
 
-# Check if there are any missing values in the dataset
-if (all(!is.na(analysis_data))) {
-  message("Test Passed: The dataset contains no missing values.")
-} else {
-  stop("Test Failed: The dataset contains missing values.")
-}
-
-# Check if there are no empty strings in 'division', 'state', and 'party' columns
-if (all(analysis_data$division != "" & analysis_data$state != "" & analysis_data$party != "")) {
-  message("Test Passed: There are no empty strings in 'division', 'state', or 'party'.")
-} else {
-  stop("Test Failed: There are empty strings in one or more columns.")
-}
-
-# Check if the 'party' column has at least two unique values
-if (n_distinct(analysis_data$party) >= 2) {
-  message("Test Passed: The 'party' column contains at least two unique values.")
-} else {
-  stop("Test Failed: The 'party' column contains less than two unique values.")
+if (any(is.na(merged_real_mvp$MVP_index))) {
+  warning("merged_real_mvp contains missing values in MVP_index")
 }
