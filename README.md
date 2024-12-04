@@ -9,7 +9,7 @@ This paper examines the methodology behind the NBA’s Most Valuable Player (MVP
 
 The repo is structured as:
 
--   `data/raw_data` contains the raw data as obtained from @bbref.
+-   `data/raw_data` contains the raw data as obtained from Sports Reference.
 -   `data/analysis_data` contains the cleaned data set that was constructed.
 -   `model` contains fitted models. 
 -   `other` contains relevant literature, details about LLM chat interactions, and sketches.
