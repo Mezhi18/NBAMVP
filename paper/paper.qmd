@@ -2,8 +2,8 @@
 title: "Finding the True MVP"
 subtitle: "An NBA Analysis Through Linear Regression"
 author: 
-  - Yan B. Mezhiborsky
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+  - Yan Mezhiborsky
+thanks: "Code and data are available at: [https://github.com/Mezhi18/NBAMVP.]"
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
@@ -75,11 +75,7 @@ As we collected data from each year since 1986 individually, we have utilized th
 
 As each year has an individual data set we took PTS, TRB, AST, BLK, STL,a nd WS took the average for that year and normalized each player's statistics by dividing them by the average of that year with this we have created the MVP Index which we have defined as:
 
-$$
-
-MVP_{Index} = 0.8PTS_{Norm} + 0.25AST_{Norm} + 0.25TRB_{Norm} + 0.1STL_{Norm} + 0.1BLK_{Norm} + 0.15WS_{Norm}
-
-$$
+$$MVP_{Index} = 0.8PTS_{Norm} + 0.25AST_{Norm} + 0.25TRB_{Norm} + 0.1STL_{Norm} + 0.1BLK_{Norm} + 0.15WS_{Norm}$$
 
 With this `MVP Index` we have created our own list of who could have been MVP base on statistics for that year, essentially comparing how good the player was to othe rplayers in the basketball season.
 
@@ -87,16 +83,16 @@ With this `MVP Index` we have created our own list of who could have been MVP ba
 
 For our second set of date we have all MVPs since 1986 also sourced from [@bbref], and the variables that have been used are the following:
 
--`Player:` The name of the NBA player.
--`Year:` The year in which the player was selected as MVP.
--`Tm:` The three letter designation for the NBA team the player played for the year.
--`G:` Games played by the player.
--`MP:` Minutes played per game.
--`PTS:` Points per game.
--`TRB:` Total Rebounds per game, including offensive and defensive rebounds.
--`BLK:` Blocks per game
--`STL:` Steals Per game
--`WS:` The amount of wins allocated to the individual player
+-   `Player:` The name of the NBA player.
+-   `Year:` The year in which the player was selected as MVP.
+-   `Tm:` The three letter designation for the NBA team the player played for the year.
+-   `G:` Games played by the player.
+-   `MP:` Minutes played per game.
+-   `PTS:` Points per game.
+-   `TRB:` Total Rebounds per game, including offensive and defensive rebounds.
+-   `BLK:` Blocks per game
+-   `STL:` Steals Per game
+-   `WS:` The amount of wins allocated to the individual player
 
 ## Measurement
 
@@ -525,12 +521,11 @@ Background details and diagnostics are included in [Appendix -@sec-model-details
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.
+Define $y_i$ as the MVP Index. Then $\pi_i$ as the points per game, then $\alpha_i$ as assists per game, next we have $\rho_i$ as rebounds per game. Furthermore, we have $\beta_i$ as blocks per game, then we have $\xi_i$ for steals per game, lastly we have $\omega_i$ for win shares. With these variables we will be predicting the MVP Index for the following NBA season.
 
 \begin{align}
 y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 \mu_i &= \pi_i + \alpha_i + \rho_i + \beta_i + \xi_i + \omega_i \\
-\mu &\sim \mbox{Normal}(0, 2.5) \\
 \pi &\sim \mbox{Normal}(0, 2.5) \\
 \alpha &\sim \mbox{Normal}(0, 2.5) \\
 \rho &\sim \mbox{Normal}(0, 2.5) \\
@@ -545,6 +540,10 @@ y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
 
 
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
+#| echo: false
 
 # create a linear regression model
 lm_model <- lm(MVP_index ~ PTS + AST + TRB + BLK + STL + WS, data = nba_master)
@@ -571,18 +570,18 @@ predicted_index_real_mvp <- predict(lm_model, newdata = next_year_real_mvp_stats
 
 ### Model justification
 
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
+We expect a positive relationship between Between MVP Index and points, assists, rebounds, block, steals and win shares, as as these are all variables that define the MVP Index. In addition we expect a positive relationship as all of these statitcs indicate a good player, the larger anyone of these stats stats are the larger the MVP Index will be for the respective player. Just because a player does not aquire many block or many asists does not mean a player will have a low MVP rating, this just mean they will have to compensate with their other stats.
 
 ### Model Results
+
+Below we can see @tbl-modelresults where we can see the MVPs from the last 10 years, including an additional unknown MVP with a projected MVP Index score. For this table we used both Historical Data with past MVP winners as well as data we have created on our own. The data we have created includes players that have had the highest MVP Index within their respective year, so not necessarily the same player that truly won the MVP Award that year. As we can see the historical data predicts a player to have an MVP index of 2.40 while our data suggests that the Player with the highest MVP index will be 2.45, as such it is very likely that the player with the highest MVP Index will not be the player selected for the MVP award. As with the 2024 season the player awarded with the MVP award was Nikola Jokic with an MVP Index score of 2.16, while Luka Doncic another player well deserving of the MVP Award and was in the race to win the award has a score of 2.20 which is in fact higher than Nikola Jokic's.
 
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
-#| label: fig-modeltable
+#| label: tbl-modelresults
 #| fig-cap: "Historical MVP and Player with highest MVP Index since 2014"
 
 # Filter MVPs from 2014 to 2024 for both datasets
@@ -651,16 +650,19 @@ combined_table <- full_join(
   by = "Year"
 )
 
+
 print(combined_table)
 
 
 
 ```
-
+As we have learned from @tbl-model results and which we can see in @tbl-index it is obvious that the MVP is not always the player that performs the best statistically, as LeBron James would have won 8 MVP awards before entering the 2013-2014 season, which would be 8 MVP awards in 10 years. Therefore, there must other factors excluding the statistics we were looking at, such as human error or prejudice, team success, and overall story telling which we will look further into in @sec-discussion.
 
 # Results
 
-Our results are summarized in @tbl-modelresults.
+In this section we will be taking a look at some statistics since 1986, starting with MVP index, the moving on to PPG, the RPG, and lastly we will look at APG. In these graphs we will be looking at Historical MVPs as well as players from each year with the highest MVP index. Analyzing these graphs will help us will help us understand how these stats developped through time among the best of the best in the NBA and potentially which statistics are valued more in real life than in the real MVP race.
+
+## MVP Index Since 1986 {#sec-mvp-index}
 
 ```{r}
 #| echo: false
@@ -693,7 +695,10 @@ ggplot(merged_data, aes(x = Year, y = MVP_index, group = Source)) +
 
 
 ```
+In @fig-mvpindex we see that both graphs seem to bounce around a lot until we reach the 2020s where both seem to converge at around an MVP Index score of 2.2. This could mean several things the MVPs are getting worse which is incredibly unlikely and we do not believe that this is the case, another possibility is that the competition is getting better and more consistent. We must remember that the MVP index relies just as much on all the other players in the data set as much as it relies on the player who's MVP Index we are looking at. If we look at the 2004-05 and the 2005-06 seasons we can see a large dip in historical MVPs, this can be attributed to Phoenix Suns' point guard Steve Nash, as he was not even in the top 10 of MVP index with two teammate Amar'e Stoudemire and Shawn Marion two of Nash's teammates both ahve a higher Index than Nash. Although these are some of the most contentious MVP selections in the past 20 years, it must be considered what NBA analysts saw in him, as his team did have success, although falling short of the championship, and he was a great leader both on and off the court, as a floor general and a mentor. The question still remains did Nash deserve those MVPs? And is the Selection process for choosing an MVP flawed?
 
+
+## PPG since 1986
 
 ```{r}
 #| echo: false
@@ -759,6 +764,10 @@ print(pts_plot)
 
 ```
 
+We will no be looking at @fig-pts where we are looking at MVP's points per game through the years. As this graph is similar to @fig-mvpindex in the sense that then numbers do seem to be bouncing around although here we see that they do not seem to be converging around a single point. Although in this grapgh we see something interesting as well, Both Simulated MVs and Historical MVPs there seems to be an increasing baseline as well as an increasing top line, while the points are bouncing up and down through the years there along the top data points and the bottom data points, excluding Steve Nash, the only player to win MVP while scoring under 20ppg since 1986, who we discussed in @sec-mvp-index. The interesting thing is that this occurs in both graphs, this tells us that as the years go on the points scored by MVPs, even those who tend to score less are increasing this can be confirmed in a the paper @yan.
+
+
+## RPG since 1986
 
 ```{r}
 #| echo: false
@@ -769,7 +778,9 @@ print(pts_plot)
 
 print(trb_plot)
 ```
+In @fig-reb we are considering at rebounds per game. This gives us some additionnal information on the type of MVPs and what was prioritized at which points in time. We can see that there is a significant dip between the mid 2000s and the mid 2010s when we lokmat Historical Data and simulated MVPs there is a lack of 'Big Men', Centers and Power Forwards, they are often the players with the most rebounds on a given team espcially until the late 2010s
 
+## APG since 1986
 
 ```{r}
 #| echo: false
@@ -786,7 +797,7 @@ print(ast_plot)
 
 
 
-# Discussion
+# Discussion {#sec-discussion}
 
 ## First discussion point {#sec-first-point}
 
@@ -808,33 +819,35 @@ Weaknesses and next steps should also be included.
 
 # Appendix {.unnumbered}
 
-# Additional data details
+# MVP Table By MVP Index
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: tbl-index
+#| fig-cap: "Potential MVPs By Index"
+
+print(mvp_table)
+```
+
 
 # Model details {#sec-model-details}
 
 ```{r}
+#| include: true
+#| warning: false
+#| message: false
+#| echo: false
 lm_summary <- summary(lm_model)
 
 print(lm_summary)
 ```
 
 
-## Posterior predictive check
-
-## Diagnostics
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
 
 
-```
+
 
 \newpage
 
