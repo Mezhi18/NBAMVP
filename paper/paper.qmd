@@ -845,7 +845,7 @@ Our next steps, would like be to monitor this NBA season closely potentially add
 
 ## Overview of MVP Voting Methodology
 
-The MVP award voting process relies on a panel of sportswriters and broadcasters across the United States and Canada, with each voter ranking their top five players. The point system allocates 10 points for a first-place vote, 7 for second, 5 for third, 3 for fourth, and 1 for fifth. The player with the highest total points is named the MVP. While this system ensures broad coverage across media markets, it introduces potential biases rooted in the selection of voters, the weighting system, and the lack of transparency in the criteria used by individual voters.
+The MVP award voting process relies on a panel of sportswriters and broadcasters across the United States and Canada, with each voter ranking their top five players. The point system allocates 10 points for a first-place vote, 7 for second, 5 for third, 3 for fourth, and 1 for fifth. The player with the highest total points is named the MVP. While this system ensures broad coverage across media markets, it introduces potential biases rooted in the selection of voters, the weighting system, and the lack of transparency in the criteria used by individual voters. [@schmitz]
 
 ## Observational Nature of NBA Data
 
@@ -859,7 +859,7 @@ The panel of voters is not a random sample of all stakeholders in the NBA commun
 
 To examine the robustness of MVP outcomes, simulations were conducted to evaluate how changes to the voting methodology could influence results. For instance, adjusting the weight given to statistical performance in vote tallies revealed several seasons where the MVP Index-aligned winner differed from the historically selected MVP. Similarly, experimenting with alternative weighting schemes, such as assigning equal points for all top-five rankings instead of a tiered system, led to notable shifts in the final outcomes. These simulations highlight the significant role that methodological choices play in shaping MVP selections, showing that even small adjustments can result in different winners. By simulating different voting scenarios, it becomes clear that the current system is sensitive to how votes are counted and weighted, underscoring the need for transparency and careful consideration of methodology.
 
-# Table By MVP Index {#sex-index}
+# Table By MVP Index {#sec-index}
 
 ```{r}
 #| include: true
