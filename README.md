@@ -1,9 +1,7 @@
 # NBA MVP Analysis
 
 ## Overview
-Who is the true NBA MVP?
-
-Should the way the MVP is selected b changed
+Who is the true NBA MVP? Should the way the MVP is selected be changed? Is there a better metric to measure a player's performance?
 
 ## Abstract
 
