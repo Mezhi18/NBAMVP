@@ -588,6 +588,7 @@ As seen in the table, the historical data predicts a player to have an MVP Index
 
 ```{r}
 #| echo: false
+#| include: true
 #| warning: false
 #| message: false
 #| label: tbl-modelresults
@@ -660,11 +661,17 @@ combined_table <- full_join(
 )
 
 
+tiny_combined_table <- tt(combined_table)
+
 print(combined_table)
+print(tiny_combined_table)
 
 
 
 ```
+
+
+
 As we have learned from @tbl-modelresults and which we can see in @sec-index it is obvious that the MVP is not always the player that performs the best statistically, as LeBron James would have won 8 MVP awards before entering the 2013-2014 season, which would be 8 MVP awards in 10 years. Therefore, there must other factors excluding the statistics we were looking at, such as human error or prejudice, team success, and overall story telling which we will look further into in @sec-discussion.
 
 # Results {#sec-results}
