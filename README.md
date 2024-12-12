@@ -27,4 +27,4 @@ Aspects of the code were written with the help of the auto-complete tool, Codriv
 ## Data Collection
 
 The process of data collection from Basketball Reference was a rather odd and tedious process as for every table needed opened in an excel file before saving it as a .csv file that could read by R. The instructions can be found in the following Link:
-https://www.sports-reference.com/blog/2016/11/exporting-data/
+https://www.sports-reference.com/blog/2017/03/automatic-excel-export-added-back-to-tables/
