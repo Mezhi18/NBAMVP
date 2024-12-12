@@ -61,14 +61,15 @@ Building on the methodologies outlined in [@tellingstories], we employed various
 As we collected data from each year since 1986 individually, we have utilized the following variables:
 
 -   `Team:` Whether the player was in the 1st, 2nd, or 3rd All NBA Teams or OVR if they did not make the top three teams but still received a vote.
--   `Pos:` The player's position including the generalized positions G, F, C, for Guard, Forward, and Center respectively.
--   `Player:` The name of the NBA player.
--   `Age:` The age of the NBA player.
--   `Tm:` The three letter designation for the NBA team the player played for the year.
--   `G:` Games played by the player.
--   `MP:` Minutes played per game.
--   `PTS:` Points per game.
--   `TRB:` Total Rebounds per game, including offensive and defensive rebounds.
+-   `Pos:` The player's position including the generalized positions G, F, C, for Guard, Forward, and Center respectively
+-   `Player:` The name of the NBA player
+-   `Age:` The age of the NBA player
+-   `Tm:` The three letter designation for the NBA team the player played for the year
+-   `G:` Games played by the player
+-   `MP:` Minutes played per game
+-   `PTS:` Points per game
+-   `TRB:` Total Rebounds per game, including offensive and defensive rebounds
+-   `AST:` Assists Per game
 -   `BLK:` Blocks per game
 -   `STL:` Steals Per game
 -   `WS:` The amount of wins allocated to the individual player
@@ -84,12 +85,13 @@ With this `MVP Index` we have created our own list of who could have been MVP ba
 For our second set of date we have all MVPs since 1986 also sourced from [@bbref], and the variables that have been used are the following:
 
 -   `Player:` The name of the NBA player.
--   `Year:` The year in which the player was selected as MVP.
--   `Tm:` The three letter designation for the NBA team the player played for the year.
--   `G:` Games played by the player.
--   `MP:` Minutes played per game.
--   `PTS:` Points per game.
--   `TRB:` Total Rebounds per game, including offensive and defensive rebounds.
+-   `Year:` The year in which the player was selected as MVP
+-   `Tm:` The three letter designation for the NBA team the player played for the year
+-   `G:` Games played by the player
+-   `MP:` Minutes played per game
+-   `PTS:` Points per game
+-   `AST:` Assists Per game
+-   `TRB:` Total Rebounds per game, including offensive and defensive rebounds
 -   `BLK:` Blocks per game
 -   `STL:` Steals Per game
 -   `WS:` The amount of wins allocated to the individual player
@@ -577,7 +579,7 @@ saveRDS(lm_model, "../models/lm_model.rds")
 
 ### Model justification
 
-We expect a positive relationship between MVP Index and points, assists, rebounds, blocks, steals, and win shares, as these variables collectively define the MVP Index. Additionally, we anticipate a positive relationship because all these statistics indicate strong player performance. The larger any one of these statistics is, the larger the MVP Index will be for the respective player. However, a player who does not acquire many blocks or assists will not necessarily have a low MVP rating; they will simply need to compensate with higher performance in other areas. As shown in @sec-model-details, the model has a p-value of less than $2.2 \times 10^{-16}$, which is very low and gives us confidence that the model is accurate.
+We expect a positive relationship between MVP Index and points, assists, rebounds, blocks, steals, and win shares, as these variables collectively define the MVP Index. Additionally, we anticipate a positive relationship because all these statistics indicate strong player performance. The larger any one of these statistics is, the larger the MVP Index will be for the respective player. However, a player who does not acquire many blocks or assists will not necessarily have a low MVP rating; they will simply need to compensate with higher performance in other areas. As shown in @sec-model-details, the model has a p-value of less than $2.2 \times 10^{-16}$, which is very low and gives us confidence that the model is accurate, as well as an $R^{2}$ of $R^{2} = 0.8992$, with a corresponding $R = 0.9483$.
 
 ### Model Results
 
@@ -592,7 +594,6 @@ As seen in the table, the historical data predicts a player to have an MVP Index
 #| warning: false
 #| message: false
 #| label: tbl-modelresults
-#| fig-cap: "Historical MVP and Player with highest MVP Index since 2014"
 
 # Filter MVPs from 2014 to 2024 for both datasets
 mvp_table_filtered <- mvp_table %>%
@@ -661,15 +662,31 @@ combined_table <- full_join(
 )
 
 
+combined_table <- combined_table %>%
+  rename(
+    `Year` = Year,
+    `Sim Player` = `Simulated Data - Player`,
+    `Sim MVP` = `Simulated Data - MVP Index`,
+    `Hist Player` = `Historical Data - Player`,
+    `Hist MVP` = `Historical Data - MVP Index`
+  )
+
+
 tiny_combined_table <- tt(combined_table)
 
-print(combined_table)
-print(tiny_combined_table)
 
 
 
 ```
 
+```{r}
+#| echo: false
+
+
+
+
+print(tiny_combined_table)
+```
 
 
 As we have learned from @tbl-modelresults and which we can see in @sec-index it is obvious that the MVP is not always the player that performs the best statistically, as LeBron James would have won 8 MVP awards before entering the 2013-2014 season, which would be 8 MVP awards in 10 years. Therefore, there must other factors excluding the statistics we were looking at, such as human error or prejudice, team success, and overall story telling which we will look further into in @sec-discussion.
@@ -889,7 +906,11 @@ To examine the robustness of MVP outcomes, simulations were conducted to evaluat
 #| message: false
 #| echo: false
 
-print(mvp_table)
+mvp_table <- mvp_table %>% select(-Source)
+
+tiny_mvp_table <- tt(mvp_table)
+
+print(tiny_mvp_table)
 ```
 
 # Historical MVPs
@@ -902,9 +923,12 @@ print(mvp_table)
 
 Real_MVP_Datas <- Real_MVP_Data[-c(1, nrow(Real_MVP_Data)), ]
 
+Real_MVP_Data_f <- Real_MVP_Datas %>% select(-FG., -X3P., -FT., -WS.48, -Voting, -Lg, -Tm, -G, -MP)
+
 write.csv(Real_MVP_Datas, "../data/02-analysis_data/Real_MVP_Datas.csv", row.names = FALSE)
 
-print(Real_MVP_Datas)
+tiny_real_mvp <- tt(Real_MVP_Data_f)
+print(tiny_real_mvp)
 ```
 
 
@@ -916,7 +940,9 @@ print(Real_MVP_Datas)
 #| warning: false
 #| message: false
 #| echo: false
+#| 
 lm_summary <- summary(lm_model)
+
 
 print(lm_summary)
 ```
