@@ -21,13 +21,12 @@ toc: true
 
 library(tidyverse)
 library(rstanarm)
-library(dplyr)
 library(janitor)
 library(lubridate)
 library(modelsummary)
 library(knitr)
 library(StanHeaders)
-library(kableExtra)
+library(tinytable)
 
 ```
 
@@ -48,7 +47,7 @@ The remainder of this paper is structured as follows. Section @sec-data outlines
 
 ## Overview
 
-We use the statistical programming language R [@citeR] along with several packages to clean and manipulate our data, including [@tidyverse], [@rstanarm], [@dplyr], [@janitor], [@lubridate], [@modelsummary], [@knitr], [@StanHeaders], and [@kableExtra]. These tools allowed us to clean the data, add years to datasets that only included basketball seasons, and generate well-formatted tables that go beyond the basic functionality of traditional R software.
+We use the statistical programming language R [@citeR] along with several packages to clean and manipulate our data, including [@tidyverse], [@rstanarm], [@dplyr], [@janitor], [@lubridate], [@modelsummary], [@knitr], [@StanHeaders], and [@tiny]. These tools allowed us to clean the data, add years to datasets that only included basketball seasons, and generate well-formatted tables that go beyond the basic functionality of traditional R software.
 
 Our data was collected from [@bbref], focusing on every player who received a vote for any All-NBA Team since 1986. This includes votes for the First, Second, and Third All-NBA Teams. We chose this approach to ensure a larger and more comprehensive sample, as limiting the scope to players who received MVP votes would have resulted in a smaller dataset. Additionally, we created a new statistic called MVP_Index, which is defined in @sec-variables. This statistic was used to evaluate players and compare them to the official NBA MVPs since 1986, providing insights into alternative MVP selections.
 
@@ -869,7 +868,7 @@ MVP voting data is inherently observational, reflecting subjective decisions rat
 
 ## Sampling Representation of Voters
 
-The panel of voters is not a random sample of all stakeholders in the NBA community. Instead, it is a curated group of media professionals, which may underrepresent certain perspectives, such as fans, coaches, or analytics experts. This introduces a potential sampling bias that could influence the results. For example, regional biases might favor players from large-market teams, while recency bias could elevate players with late-season surges. Simulation studies could explore the extent of these biases by randomly reweighting votes or introducing new voter segments, e.g., analytics specialists.
+The panel of voters is not a random sample of all stakeholders in the NBA community. Instead, it is a curated group of media professionals, which may underrepresented certain perspectives, such as fans, coaches, or analytics experts. This introduces a potential sampling bias that could influence the results. For example, regional biases might favor players from large-market teams, while recency bias could elevate players with late-season surges. Simulation studies could explore the extent of these biases by randomly reweighting votes or introducing new voter segments, e.g., analytics specialists.
 
 ## Simulation of MVP Voting Under Different Scenarios
 
