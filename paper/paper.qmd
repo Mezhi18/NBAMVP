@@ -702,7 +702,7 @@ In this section, we examine key basketball statistics since 1986, beginning with
 #| warning: false
 #| message: false
 #| label: fig-mvpindex
-#| fig-cap: "MVP index of of Historical and simulated MVPs"
+#| fig-cap: "MVP index of Historical and simulated MVPs"
 
 merged_data <- bind_rows(
   merged_real_mvp %>% mutate(Source = "Historical MVPs"),
@@ -715,7 +715,6 @@ ggplot(merged_data, aes(x = Year, y = MVP_index, group = Source)) +
   geom_point(aes(color = Source), size = 3, alpha = 0.7) +  # Keep the points
   facet_wrap(~ Source, ncol = 2) +  # Facet by the Source column, side by side
   labs(
-    title = "Scatter: Year vs. MVP Index",
     x = "Year",
     y = "MVP Index"
   ) +
@@ -742,7 +741,7 @@ This raises critical questions: Did Nash truly deserve those MVP awards? And, pe
 #| warning: false
 #| message: false
 #| label: fig-pts
-#| fig-cap: "MVP PPG over Time"
+#| fig-cap: "PPG of Historical and simulated MVPs"
 
 # Add a source column to the datasets
 mvp_table <- mvp_table %>%
@@ -815,7 +814,7 @@ A notable exception to this trend is Steve Nash, the only MVP since 1986 to win 
 #| warning: false
 #| message: false
 #| label: fig-reb
-#| fig-cap: "MVP RPG over Time"
+#| fig-cap: "RPG of Historical and simulated MVPs"
 
 print(trb_plot)
 ```
@@ -831,7 +830,7 @@ The early 2000s saw dominant rebounders like Shaquille O’Neal, Tim Duncan, and
 #| warning: false
 #| message: false
 #| label: fig-ast
-#| fig-cap: "MVP ASG over Time"
+#| fig-cap: "APG of Historical and simulated MVPs"
 
 print(ast_plot)
 ```
@@ -840,6 +839,7 @@ Lastly, we examine @fig-ast, which graphs assists per game over time since 1986.
 
 After reviewing these visuals, we can conclude that each of these statistics exhibits a somewhat growing trend. While the growth may not always be consistent, it does appear to exist. This suggests that MVPs in the modern NBA are increasingly likely to be selected if they are well-rounded players, athletes who not only score points and rebound effectively but also contribute as unselfish teammates by creating scoring opportunities through their passing.
 
+\newpage
 
 # Discussion {#sec-discussion}
 
@@ -862,7 +862,7 @@ In contrast, players who showcase moments of sheer brilliance often become the f
 
 The voting methodology and transparency in the NBA, particularly for awards like the MVP, have significant implications for the league’s credibility and fan engagement. The MVP award is determined by a panel of sportswriters and broadcasters from the United States and Canada, with each voter ranking their top five candidates. Points are assigned on a weighted scale, and the player with the highest total is named MVP. While this system allows for expert analysis, transparency remains a recurring discussion point. Critics often call for more public access to the detailed ballots to ensure accountability and minimize potential biases. The NBA has made strides in recent years by releasing voters’ choices post-award, fostering a culture of openness. However, debates about the inclusion of diverse perspectives, potential regional biases, and the weight given to narrative versus statistical performance continue to shape the conversation around fairness and transparency in the voting process.
 
-## Weaknesses and next steps {#sec-weak}
+## Weaknesses and Next Steps {#sec-weak}
 
 First, what would have been ideal especially in terms of using our model, would have been to take players from the all 3 All NBA teams, and download the data from these players and have our model analyze the data so we would have an actual name of a player for our predicted MVP Index and not just the score. While this would have been great time constraints and other external factors hindered us from implementing this further analysis.
 
@@ -896,7 +896,7 @@ The panel of voters is not a random sample of all stakeholders in the NBA commun
 
 ## Simulation of MVP Voting Under Different Scenarios
 
-To examine the robustness of MVP outcomes, simulations were conducted to evaluate how changes to the voting methodology could influence results. For instance, adjusting the weight given to statistical performance in vote tallies revealed several seasons where the MVP Index-aligned winner differed from the historically selected MVP. Similarly, experimenting with alternative weighting schemes, such as assigning equal points for all top-five rankings instead of a tiered system, led to notable shifts in the final outcomes. These simulations highlight the significant role that methodological choices play in shaping MVP selections, showing that even small adjustments can result in different winners. By simulating different voting scenarios, it becomes clear that the current system is sensitive to how votes are counted and weighted, underscoring the need for transparency and careful consideration of methodology.
+To examine the robustness of MVP outcomes, simulations were conducted to evaluate how changes to the voting methodology could influence results. For instance, adjusting the weight given to statistical performance in vote tallies revealed several seasons where the MVP Index-aligned winner differed from the historically selected MVP. Similarly, experimenting with alternative weighting schemes, such as assigning equal points for all top-five rankings instead of a tiered system, led to notable shifts in the final outcomes. These simulations highlight the significant role that methodological choices play in shaping MVP selections, showing that even small adjustments can result in different winners. By simulating different voting scenarios, it becomes clear that the current system is sensitive to how votes are counted and weighted, emphasising the need for transparency and careful consideration of methodology.
 
 # Table By MVP Index {#sec-index}
 
